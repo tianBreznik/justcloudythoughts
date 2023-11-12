@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
 
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+//import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import WebGL from 'three/addons/capabilities/WebGL.js';
 
 const s = ( sketch ) => {
@@ -364,11 +364,11 @@ function init() {
 
     }
 
-    const gui = new GUI();
-    gui.add( parameters, 'threshold', 0, 1, 0.01 ).onChange( update );
-    gui.add( parameters, 'opacity', 0, 1, 0.01 ).onChange( update );
-    gui.add( parameters, 'range', 0, 1, 0.01 ).onChange( update );
-    gui.add( parameters, 'steps', 0, 200, 1 ).onChange( update );
+    // const gui = new GUI();
+    // gui.add( parameters, 'threshold', 0, 1, 0.01 ).onChange( update );
+    // gui.add( parameters, 'opacity', 0, 1, 0.01 ).onChange( update );
+    // gui.add( parameters, 'range', 0, 1, 0.01 ).onChange( update );
+    // gui.add( parameters, 'steps', 0, 200, 1 ).onChange( update );
 
     window.addEventListener( 'resize', onWindowResize );
 
