@@ -107,6 +107,7 @@ const s = ( sketch ) => {
   };
 
 let p5instance = new p5(s);
+
 if ( WebGL.isWebGL2Available() === false ) {
 
     document.body.appendChild( WebGL.getWebGL2ErrorMessage() );
@@ -130,9 +131,6 @@ let mesh;
 
 //   } 
 // );
-
-// init();
-// animate();
 
 function init() {
 
@@ -400,6 +398,8 @@ function onDocumentMouseMove( event ) {
 
 var target = new THREE.Vector3();
 window.addEventListener("mousemove", onDocumentMouseMove);
+init();
+animate();
 function animate() {
 
     mesh.material.uniforms.cameraPos.value.copy( camera.position );
