@@ -7,15 +7,26 @@ import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
 //import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import WebGL from 'three/addons/capabilities/WebGL.js';
 
+/*
+
+Using p5 in instance mode, as I am
+using 2 canvases overlayed over one 
+another, so the base code is written
+in javascript plus three.js for some 
+extra visual effect processing, and 
+so not in p5.
+
+*/
 const s = ( sketch ) => {
 
+    //p5 code
     let x = 100;
     let y = 100;
 
+    //declare and initialize needed variables
     let currentsentence;
     let sentence = 0;
     let image = 1;
-    let cx, cy;
     let pos = 0;
     let restartDelay = 3;
     let positionX;
@@ -27,15 +38,15 @@ const s = ( sketch ) => {
     const upper = 0x1f9ff;
     let img;
 
+    //array of sentences pulled from tumblr
     let thoughtdata = [];
     sketch.preload = () => {
         thoughtdata = sketch.loadJSON("data/entries.json");
     }
 
     sketch.setup = () => {
-      //sketch.background(169, 169, 169);
-      currentsentence = thoughtdata[sentence].THOUGHT;
-      console.log(currentsentence);
+
+      //create p5 canvas and parent it to a the already existing div 'p5div'
       var c = sketch.createCanvas(window.innerWidth, window.innerHeight);
       c.parent('p5Div');
       sketch.colorMode(sketch.RGB, 150);
@@ -43,120 +54,130 @@ const s = ( sketch ) => {
       b = sketch.random(0, 255);
       g = sketch.random(0, 255);
 
-      cx = sketch.width/2;
-      cy = sketch.height/2;
+      //initialize text book coordinates 
       positionX = sketch.random(0, sketch.width);
       positionY = sketch.random(0, sketch.height);
       textsize = 20;
       emojisize = 20;
       sketch.frameRate(10);
 
+      //load first image
       img = sketch.loadImage('images/1.jpeg');
     };
-  
+
+    //define p5 draw function in instance mode
     sketch.draw = () => {
-      //sketch.background(169, 169, 169);
+      
+      //fill color and stroke color
       sketch.fill(r, g, b);
+      //make watery effect by using randomness to 
+      //draw text with and without stroke randomly
       if(sketch.random(0,1) < 0.15){
         sketch.stroke(r,g,b);
       }
       else{
         sketch.noStroke();
       }
-      sketch.textFont('Times New Roman');
+      //load basic timeless font! and set first size
+      sketch.textFont('Arial');
       sketch.textSize(textsize);
 
+      //if there is a sentence
       if(thoughtdata[sentence]){
+
+        //take first sentence
         let currentsentence = thoughtdata[sentence].THOUGHT;
+        console.log(currentsentence);
     
+        //start drawing(typing) sentence
         sketch.text(currentsentence.substring(0, pos + 1), positionX, positionY, 200, 300);
+
+        //pick random emoji (reuse r channel for the random number)
         const code = sketch.int(sketch.map(r, 0, 255, lower, upper));
         const chr = String.fromCodePoint(code);
+        //set text (emoji) size
         sketch.textSize(emojisize);
+        //draw emoji
         sketch.text(chr, (g/255)*sketch.width, (b/255)*sketch.height);
     
+        //iterate character index (which character of sentence is drawn)
         pos++;  
 
+        //if the sentence is drawn and delay is finsihed
         if (pos > currentsentence.length + restartDelay) {
+
+            //map sentence lenght to text size and emoji size
+            //this map is redundant for setting position, as it 
+            //does not make much of a difference visually
             textsize = sketch.map(currentsentence.length, 1, 258, 30, 5);
             emojisize = sketch.map(currentsentence.length, 1, 258, 100, 30);
             positionX = sketch.random(0, 0.75*sketch.width);
             positionY = sketch.random(0, 0.95*sketch.height);
             
-            sketch.randomSeed(pos);
+            //get random color
             r = sketch.random(255);
             g = sketch.random(255);
             b = sketch.random(255);
-        
+
+            //reset type index
             pos = 0;
-            //sketch.image(img, sketch.random(0,sketch.width*0.8), sketch.random(0, sketch.height*0.8), img.width / 10, img.height / 10);
             console.log(sentence % 3);
+            //every third sentence draw an image
             if(sentence % 3 == 0 || sentence == 0){
-                console.log("yes");
-                sketch.loadImage("images/" + image + ".jpeg", (img) => {
-                    sketch.image(img, sketch.random(0,sketch.width*0.8), sketch.random(0, sketch.height*0.8), img.width / 10, img.height / 10);
-                });
-                image++;
+                if(image <= 50){
+                    sketch.loadImage("images/" + image + ".jpeg", (img) => {
+                        sketch.image(img, sketch.random(0,sketch.width*0.8), sketch.random(0, sketch.height*0.8), img.width / 10, img.height / 10);
+                    });
+                    image++;
+                }
             }
+            //go to next sentence 
             sentence++;
+            //blur the screen
             sketch.filter(sketch.BLUR, 2);
         }
         // Check if we are at the end of the sentence to restart animation
       }
     };
+
+    sketch.windowResized = () => {
+        sketch.resizeCanvas(windowWidth, windowHeight);
+      }
   };
 
+//create p5 instance - enough to just call it
 let myp5 = new p5(s, 'p5div');
 
+//check availability of webgl on device
 if ( WebGL.isWebGL2Available() === false ) {
 
     document.body.appendChild( WebGL.getWebGL2ErrorMessage() );
 
 }
 
+//declare variables
 let renderer, scene, camera, controls;
-//const HDR = '/textures/environmentMap/sky.exr';
 let mesh;
-
-// const hdrEquirect = new EXRLoader()
-//   .load( HDR, function () {
-
-//     console.log(HDR);
-//     //exrCubeRenderTarget = pmremGenerator.fromEquirectangular( HDR );
-//     hdrEquirect.mapping = THREE.EquirectangularReflectionMapping;
-//     hdrEquirect.encoding = THREE.sRGBEncoding;
-    
-//     init();
-//     animate();
-
-//   } 
-// );
 
 function init() {
 
+    //create webgl renderer and append it to existing div "container"
     renderer = new THREE.WebGLRenderer({ alpha: true });
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setClearColor( 0xffffff, 1);
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.getElementById("container").appendChild( renderer.domElement );
 
+    //create three.js scene
     scene = new THREE.Scene();
 
-    //scene.background = hdrEquirect;
-    //scene.environment = hdrEquirect;
-
+    //create three.js camera
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 500 );
     camera.position.set( -0.032749, -0.04540059, -0.063753303559 );
     camera.rotation.set(2.5227725, -0.39629804, 2.87333228980);
 
-    // Sky
-
-    // const canvas = document.createElement( 'canvas' );
-    // canvas.width = window.innerWidth;
-    // canvas.height = window.innerHeight;
-
-    // Texture
-
+    //create "3D" texture that will hold the particles for the animation
+    //size of texture = 128*128*128 = 2,097,152
     const size = 128;
     const data = new Uint8Array( size * size * size );
 
@@ -170,7 +191,8 @@ function init() {
         for ( let y = 0; y < size; y ++ ) {
 
             for ( let x = 0; x < size; x ++ ) {
-
+                
+                //initialize texture with perlin noise, to be passed into the shaders
                 const d = 1.0 - vector.set( x, y, z ).subScalar( size / 2 ).divideScalar( size ).length();
                 data[ i ] = ( 128 + 128 * perlin.noise( x * scale / 1.5, y * scale, z * scale / 1.5 ) ) * d * d;
                 i ++;
@@ -181,6 +203,7 @@ function init() {
 
     }
 
+    //actually make the THREE texture
     const texture = new THREE.Data3DTexture( data, size, size, size );
     texture.format = THREE.RedFormat;
     texture.minFilter = THREE.LinearFilter;
@@ -188,8 +211,8 @@ function init() {
     texture.unpackAlignment = 1;
     texture.needsUpdate = true;
 
-    // Material
-
+    //define the vertex and fragment shaders
+    //from https://threejs.org/examples/?q=cloud#webgl2_volume_cloud
     const vertexShader = /* glsl */`
         in vec3 position;
 
@@ -324,6 +347,8 @@ function init() {
         }
     `;
 
+    //initialize box geometry and material and pass it the
+    //3D texture
     const geometry = new THREE.BoxGeometry( 1, 1, 1 );
     const material = new THREE.RawShaderMaterial( {
         glslVersion: THREE.GLSL3,
@@ -343,26 +368,27 @@ function init() {
         transparent: true
     } );
 
+    //create mesh from the geometry and the material 
+    //and add it to the scene
     mesh = new THREE.Mesh( geometry, material );
     scene.add( mesh );
 
-    //
 
-    const parameters = {
-        threshold: 0.35,
-        opacity: 0.04,
-        range: 0.09,
-        steps: 200
-    };
+    // const parameters = {
+    //     threshold: 0.35,
+    //     opacity: 0.04,
+    //     range: 0.09,
+    //     steps: 200
+    // };
 
-    function update() {
+    // function update() {
 
-        material.uniforms.threshold.value = parameters.threshold;
-        material.uniforms.opacity.value = parameters.opacity;
-        material.uniforms.range.value = parameters.range;
-        material.uniforms.steps.value = parameters.steps;
+    //     material.uniforms.threshold.value = parameters.threshold;
+    //     material.uniforms.opacity.value = parameters.opacity;
+    //     material.uniforms.range.value = parameters.range;
+    //     material.uniforms.steps.value = parameters.steps;
 
-    }
+    // }
 
     // const gui = new GUI();
     // gui.add( parameters, 'threshold', 0, 1, 0.01 ).onChange( update );
@@ -383,37 +409,27 @@ function onWindowResize() {
 
 }
 
-var mouseX = 0, mouseY = 0;
-var targetX = 0, targetY = 0;
+function onResize( event ) {
 
-var windowHalfX = window.innerWidth / 2;
-var windowHalfY = window.innerHeight / 2;
-
-function onDocumentMouseMove( event ) {
-
-    mouseX = ( event.clientX - windowHalfX );
-    mouseY = ( event.clientY - windowHalfX );
-
+	const width = window.innerWidth;
+	const height = window.innerHeight;
+  	
+    camera.aspect = width / height;
+	camera.updateProjectionMatrix();
+	renderer.setSize( width, height );
+				
 }
 
-var target = new THREE.Vector3();
-window.addEventListener("mousemove", onDocumentMouseMove);
+window.addEventListener('resize', onResize);
+
 init();
 animate();
 function animate() {
 
+    //cloud effect - rotate the mesh (cloud)
     mesh.material.uniforms.cameraPos.value.copy( camera.position );
     mesh.rotation.y = - performance.now() / 2000;
-
-    targetX = ( 1 - mouseX ) * 0.002;
-    targetY = ( 1 - mouseY ) * 0.002;
-
-    //camera.rotation.x =+ performance.now() / 2000;
-    camera.rotation.x += 0.005 * ( targetY - camera.rotation.x );
-    camera.rotation.y += 0.005 * ( targetX - camera.rotation.y );
     mesh.material.uniforms.frame.value ++;
-    //controls.update();
-    //camera.update();
 
     renderer.render( scene, camera );
     
@@ -421,15 +437,3 @@ function animate() {
 
 }
 
-function onResize( event ) {
-
-	const width = window.innerWidth;
-	const height = window.innerHeight;
-  
-    windowHalf.set( width / 2, height / 2 );
-	
-    camera.aspect = width / height;
-	camera.updateProjectionMatrix();
-	renderer.setSize( width, height );
-				
-}
