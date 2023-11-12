@@ -106,7 +106,7 @@ const s = ( sketch ) => {
     };
   };
 
-let p5instance = new p5(s);
+let myp5 = new p5(s, 'p5div');
 
 if ( WebGL.isWebGL2Available() === false ) {
 
