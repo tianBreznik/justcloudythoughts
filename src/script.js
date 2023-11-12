@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import * as p5 from 'p5';
+import p5 from 'p5';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
