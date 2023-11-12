@@ -114,22 +114,22 @@ if ( WebGL.isWebGL2Available() === false ) {
 }
 
 let renderer, scene, camera, controls;
-const HDR = '/textures/environmentMap/sky.exr';
+//const HDR = '/textures/environmentMap/sky.exr';
 let mesh;
 
-const hdrEquirect = new EXRLoader()
-  .load( HDR, function () {
+// const hdrEquirect = new EXRLoader()
+//   .load( HDR, function () {
 
-    console.log(HDR);
-    //exrCubeRenderTarget = pmremGenerator.fromEquirectangular( HDR );
-    hdrEquirect.mapping = THREE.EquirectangularReflectionMapping;
-    hdrEquirect.encoding = THREE.sRGBEncoding;
+//     console.log(HDR);
+//     //exrCubeRenderTarget = pmremGenerator.fromEquirectangular( HDR );
+//     hdrEquirect.mapping = THREE.EquirectangularReflectionMapping;
+//     hdrEquirect.encoding = THREE.sRGBEncoding;
     
-    init();
-    animate();
+//     init();
+//     animate();
 
-  } 
-);
+//   } 
+// );
 
 // init();
 // animate();
